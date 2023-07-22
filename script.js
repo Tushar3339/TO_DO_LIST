@@ -1,15 +1,7 @@
 
-// Array to store content of tasks
+// Array to store tasks
 let tasks = [];
 let taskIdCounter = 0;
-// // Array to store task statuses
-// let taskStatus = [];
-// // Array to store priority of each task (low/medium/high)
-// let taskPriority = [];
-// // Array to store category of each task
-// let taskCategory = [];
-// // Array to store due date of each task
-// let taskDueDate = [];
 
 function addTask() {
     const taskInput = document.getElementById('task_input');
@@ -50,8 +42,8 @@ function addTask() {
 //                 this is true by default, so when it gets called from other functions we show the tasks.
 //                 If user click on show list button when the tasks are shown, then we will hide the tasks.
 
-// parameter2:priorityFilter -->
-//                 The tasks will be displayed for the given priority
+// parameter2:filteredTasks -->
+//                 The tasks will be filtered for the given filters.
 
 function showList(isCallFromOtherFunction, filteredTasks) {
     taskList = document.getElementById('task_list');
@@ -259,5 +251,5 @@ document.addEventListener('keypress', function (event) {
 window.addEventListener('DOMContentLoaded', function () {
     // Retriving the content from local storage
     retrieveFromLocalStorage();
-    //localStorage.clear();
+    localStorage.clear();
 });
