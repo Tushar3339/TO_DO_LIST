@@ -20,8 +20,6 @@ function addTask() {
         // Getting the priority value for the task
         let priorityInput = document.getElementById('task_priority');
         taskPriority.push(priorityInput.value);
-        //console.log(priorityInput.value);
-        //console.log(taskPriority);
 
         let categoryInput = document.getElementById('task_category');
         taskCategory.push(categoryInput.value);
