@@ -1,0 +1,158 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background-color: #FCFFE7;
+
+}
+
+.container {
+    margin: auto;
+    text-align: center;
+    width: 80%;
+    height: 80%;
+    background-color: #BAD7E9;
+    padding: 20px;
+    border-radius: 10px;
+    /* display: flex;
+    flex-direction: column;
+    justify-content: center; */
+}
+
+h1 {
+    text-align: center;
+    color: #2B3467;
+    margin-bottom: 20px;
+}
+
+#input_container {
+    display: flex;
+    margin-bottom: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+#task_input {
+    margin-right: 1%;
+    width: 200px;
+    padding: 10px;
+    font-size: 16px;
+    color: #1935d2;
+    border-radius: 5px;
+}
+
+#add_button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #a881af;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 1%;
+}
+
+#add_button:hover {
+    background-color: #80669d;
+}
+
+#show_button {
+    padding: 5px 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#task_list {
+    list-style-type: none;
+    padding: 0;
+    display: none;
+}
+
+li {
+    margin-bottom: 10px;
+    background-color: #FFF;
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* color: aqua; */
+}
+
+.delete_button {
+    padding: 5px 10px;
+    font-size: 14px;
+    color: white;
+    background-color: red;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.delete_button:hover {
+    background-color: darkred;
+}
+
+.edit_button {
+    padding: 5px 10px;
+    font-size: 14px;
+    color: white;
+    background-color: blue;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-right: 5px;
+    margin-left: 20px;
+}
+
+.info_button {
+    padding: 5px 10px;
+    font-size: 14px;
+    color: white;
+    background-color: rgb(12, 239, 182);
+    cursor: pointer;
+    border-radius: 5px;
+    margin-right: 5px;
+    margin-left: 20px;
+}
+
+.edit_button:hover {
+    background-color: darkblue;
+}
+
+.save_button {
+    padding: 5px 10px;
+    font-size: 14px;
+    color: white;
+    background-color: green;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.save_button:hover {
+    background-color: darkgreen;
+}
+
+.task_info {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    font-size: 12px;
+    color: #522222;
+    font-weight: 200;
+}
+
+.task_info select,
+.task_info input {
+    background-color: #f3f7fb;
+}
+
+/* .priority_container,
+category_container,
+due_date_container {
+    margin: 1%;
+} */
