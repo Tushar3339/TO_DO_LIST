@@ -1,35 +1,38 @@
 
 // Array to store content of tasks
 let tasks = [];
-// Array to store task statuses
-let taskStatus = [];
-// Array to store priority of each task (low/medium/high)
-let taskPriority = [];
-// Array to store category of each task
-let taskCategory = [];
-// Array to store due date of each task
-let taskDueDate = [];
+let taskIdCounter = 0;
+// // Array to store task statuses
+// let taskStatus = [];
+// // Array to store priority of each task (low/medium/high)
+// let taskPriority = [];
+// // Array to store category of each task
+// let taskCategory = [];
+// // Array to store due date of each task
+// let taskDueDate = [];
 
 function addTask() {
-    taskInput = document.getElementById('task_input');
-    task = taskInput.value
-    if (task !== '') {
-        tasks.push(task);
-        taskStatus.push(false);
+    const taskInput = document.getElementById('task_input');
+    const taskName = taskInput.value;
+    if (taskName.trim() !== '') {
 
-        // Getting the priority value for the task
-        let priorityInput = document.getElementById('task_priority');
-        taskPriority.push(priorityInput.value);
+        const priorityInput = document.getElementById('task_priority');
+        const categoryInput = document.getElementById('task_category');
+        const dueDateInput = document.getElementById('task_due_date');
 
-        let categoryInput = document.getElementById('task_category');
-        taskCategory.push(categoryInput.value);
-
-        let dueDateInput = document.getElementById('task_due_date');
-        taskDueDate.push(dueDateInput.value);
-
+        const newTask = {
+            id: taskIdCounter++,
+            name: taskName,
+            status: false,
+            priority: priorityInput.value,
+            category: categoryInput.value,
+            dueDate: dueDateInput.value,
+        };
+        tasks.push(newTask);
         taskInput.value = '';
+        categoryInput.value = '';
 
-        taskList = document.getElementById('task_list');
+        const taskList = document.getElementById('task_list');
 
         // The following code is added so that when list is being viewed and user adds task, then it should reflect in list
         if (taskList.style.display === 'block') {
@@ -40,6 +43,8 @@ function addTask() {
     saveToLocalStorage();
 }
 
+
+
 // Function:showList --> This function will show all the tasks when clicking show list button or when called from other functions.
 // parameter1:isCallFromOtherFunction --> 
 //                 this is true by default, so when it gets called from other functions we show the tasks.
@@ -47,8 +52,6 @@ function addTask() {
 
 // parameter2:priorityFilter -->
 //                 The tasks will be displayed for the given priority
-
-
 
 function showList(isCallFromOtherFunction, priorityFilter = "All") {
     taskList = document.getElementById('task_list');
@@ -58,27 +61,23 @@ function showList(isCallFromOtherFunction, priorityFilter = "All") {
         taskList.style.display = 'block';
         taskList.innerHTML = '';
 
+        let filteredTasks;
         if (priorityFilter !== "All") {
-            filteredTasks = [];
-            for (let i = 0; i < tasks.length; i++) {
-                if (taskPriority[i] === priorityFilter) {
-                    filteredTasks.push(i);
-                }
-            }
+            filteredTasks = tasks.filter(task => task.priority === priorityFilter);
         } else {
-            // If "All" is selected, show all tasks
-            filteredTasks = tasks.map((_, index) => index);
+            filteredTasks = tasks;
         }
 
         if (filteredTasks.length === 0) {
             taskList.innerHTML = '<li>No tasks found</li>';
         } else {
-            for (let i of filteredTasks) {
-                listItem = document.createElement('li');
-                setListItemInnerHtml(listItem, i);
+            for (const task of filteredTasks) {
+                const listItem = document.createElement('li');
+                listItem.id = `${task.id}`;
+                setListItemInnerHtml(listItem, task);
 
-                let editDelete = getSpanOfButtons(i);
-                listItem.appendChild(editDelete);
+                const taskButtons = getSpanOfButtons(task);
+                listItem.appendChild(taskButtons);
                 taskList.appendChild(listItem);
             }
         }
@@ -87,31 +86,27 @@ function showList(isCallFromOtherFunction, priorityFilter = "All") {
     }
 }
 
-function deleteTask(index) {
-    tasks.splice(index, 1);
-    taskStatus.splice(index, 1);
-    taskPriority.splice(index, 1);
-    taskCategory.splice(index, 1);
-    taskDueDate.splice(index, 1);
-
-    showList(true);
-
-    // Saving the content to local storage
-    saveToLocalStorage();
+function deleteTask(task) {
+    const index = tasks.findIndex(item => item.id === task.id);
+    if (index !== -1) {
+        tasks.splice(index, 1);
+        showList(true);
+        saveToLocalStorage();
+    }
 }
 
-function editTask(index) {
-    listItem = document.querySelectorAll('li')[index];
-    taskText = listItem.querySelector(`.task_content_${index}`)
+function editTask(task) {
+    const listItem = document.getElementById(`${task.id}`);
+    const taskText = listItem.querySelector(`#task_content_${task.id}`);
 
-    editArea = document.createElement('textarea');
+    const editArea = document.createElement('textarea');
     editArea.value = taskText.textContent;
 
-    saveButton = document.createElement('button');
+    const saveButton = document.createElement('button');
     saveButton.innerHTML = 'Save';
     saveButton.classList.add('save_button');
     saveButton.addEventListener('click', function () {
-        saveTask(index, editArea.value);
+        saveTask(task, editArea.value.trim());
     });
 
     listItem.innerHTML = '';
@@ -120,68 +115,72 @@ function editTask(index) {
     editArea.focus();
 }
 
-function saveTask(index, newTask) {
-    tasks[index] = newTask;
-    listItem = document.querySelectorAll('li')[index];
-    setListItemInnerHtml(listItem, index);
+function saveTask(task, newTaskName) {
+    task.name = newTaskName;
+    const listItem = document.getElementById(`${task.id}`);
+    setListItemInnerHtml(listItem, task);
 
-    let editDelete = getSpanOfButtons(index);
-    listItem.appendChild(editDelete);
+    const taskButtons = getSpanOfButtons(task);
+    listItem.appendChild(taskButtons);
+
+    saveToLocalStorage();
 }
 
-function setListItemInnerHtml(listItem, index) {
+function setListItemInnerHtml(listItem, task) {
     listItem.innerHTML = `
-    <input type="checkbox" id="task_${index}" onclick="toggleTaskStatus(${index})" ${taskStatus[index] ? "checked" : ""}>
-                <span class = "task_content_${index}">${tasks[index]}</span> 
+    <input type="checkbox" id="checkbox_${task.id}" onclick="toggleTaskStatus(${task.id})" ${task.status ? "checked" : ""}>
+        <span id="task_content_${task.id}">${task.name}</span>
                 
 `;
 }
 
-function getSpanOfButtons(index) {
-    let editDelete = document.createElement('span');
-    deleteButton = document.createElement('button');
+function getSpanOfButtons(task) {
+    const buttonSpan = document.createElement('span');
+    const deleteButton = document.createElement('button');
     deleteButton.innerHTML = 'Delete';
     deleteButton.classList.add('delete_button');
     deleteButton.addEventListener('click', function () {
-        deleteTask(index);
+        deleteTask(task);
     });
 
-
-    editButton = document.createElement('button');
+    const editButton = document.createElement('button');
     editButton.innerHTML = 'Edit';
     editButton.classList.add('edit_button');
     editButton.addEventListener('click', function () {
-        editTask(index);
+        editTask(task);
     });
 
-    infoButton = document.createElement('button');
+    const infoButton = document.createElement('button');
     infoButton.innerHTML = 'Info';
     infoButton.classList.add('info_button');
     infoButton.addEventListener('click', function () {
-        showTaskDetails(index);
-    })
+        showTaskDetails(task);
+    });
 
-    let taskInfoSpan = document.createElement('span');
-    taskInfoSpan.classList.add(`task_info_${index}`)
+    // creating a span where info of task will be shown
+    const taskInfoSpan = document.createElement('span');
+    taskInfoSpan.id = `task_info_${task.id}`;
 
-    editDelete.appendChild(editButton);
-    editDelete.appendChild(deleteButton);
-    editDelete.appendChild(infoButton);
-    editDelete.appendChild(taskInfoSpan);
+    buttonSpan.appendChild(editButton);
+    buttonSpan.appendChild(deleteButton);
+    buttonSpan.appendChild(infoButton);
+    buttonSpan.appendChild(taskInfoSpan);
 
-    return editDelete;
+    return buttonSpan;
+
+
 }
 
 
 let addButton = document.getElementById('add_button');
 let showButton = document.getElementById('show_button');
-let filterButton = document.getElementById('filter_button');
+let priorityFilterButton = document.getElementById('priority_filter_button');
 addButton.addEventListener('click', addTask);
 showButton.addEventListener('click', function () {
     showList(false);
 });
 
-filterButton.addEventListener('click', function () {
+priorityFilterButton.addEventListener('click', function () {
     let priorityFilter = document.getElementById('priority_filter').value;
     console.log(priorityFilter);
     showList(true, priorityFilter);
@@ -200,70 +199,41 @@ window.addEventListener('DOMContentLoaded', function () {
 });
 
 
-function toggleTaskStatus(index) {
-    // Toggle the status
-    taskStatus[index] = !taskStatus[index];
-
-    // Save taskStatus to Local Storage
-    saveToLocalStorage();
+function toggleTaskStatus(taskId) {
+    const task = tasks.find(task => task.id === taskId);
+    if (task) {
+        task.status = !task.status;
+        saveToLocalStorage();
+    }
 }
 
 function saveToLocalStorage() {
-    // Saving content to Local Storage
+
     localStorage.setItem('tasks', JSON.stringify(tasks));
-    localStorage.setItem('taskStatus', JSON.stringify(taskStatus));
-    localStorage.setItem('taskPriority', JSON.stringify(taskPriority));
-    localStorage.setItem('taskCategory', JSON.stringify(taskCategory));
-    localStorage.setItem('taskDueDate', JSON.stringify(taskDueDate));
 }
 
 function retrieveFromLocalStorage() {
-    // Retrieve content from Local Storage
-    savedTasks = localStorage.getItem('tasks');
-    savedTaskStatus = localStorage.getItem('taskStatus');
-    savedTaskPriority = localStorage.getItem('taskPriority');
-    savedTaskCategory = localStorage.getItem('taskCategory');
-    savedTaskDueDate = localStorage.getItem('taskDueDate');
 
+    const savedTasks = localStorage.getItem('tasks');
 
     if (savedTasks) {
         tasks = JSON.parse(savedTasks);
     }
-
-    if (savedTaskStatus) {
-        taskStatus = JSON.parse(savedTaskStatus);
-    }
-
-    if (savedTaskPriority) {
-        taskPriority = JSON.parse(savedTaskPriority);
-    }
-
-    if (savedTaskCategory) {
-        taskCategory = JSON.parse(savedTaskCategory);
-    }
-
-    if (savedTaskDueDate) {
-        taskDueDate = JSON.parse(savedTaskDueDate);
-    }
 }
 
 // This function will display the information about tasks after clicking on Info button
-function showTaskDetails(index) {
-    taskInfoSpan = document.querySelector(`.task_info_${index}`);
-    priority = taskPriority[index];
-    category = taskCategory[index];
-    dueDate = taskDueDate[index];
-
+function showTaskDetails(task) {
+    const taskInfoSpan = document.querySelector(`#task_info_${task.id}`);
 
     // Check if the details are currently visible
-    isInfoVisible = taskInfoSpan.innerHTML !== '';
+    const isInfoVisible = taskInfoSpan.innerHTML !== '';
 
     if (isInfoVisible) {
         // If the details are visible, hide them.
         taskInfoSpan.innerHTML = '';
     } else {
         // If the details are hidden, set the details.
-        taskInfoSpan.innerHTML = `<br>Priority: ${priority}<br>Category: ${category}<br>Due Date: ${dueDate}`;
+        taskInfoSpan.innerHTML = `<br>Priority: ${task.priority}<br>Category: ${task.category}<br>Due Date: ${task.dueDate}`;
     }
 
 }

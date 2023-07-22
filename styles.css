@@ -14,7 +14,8 @@ body {
 .container {
     margin: auto;
     text-align: center;
-    width: 80%;
+    width: 90%;
+    max-width: 900px;
     height: 80%;
     background-color: #BAD7E9;
     padding: 20px;
@@ -32,14 +33,16 @@ h1 {
 
 #input_container {
     display: flex;
+    flex-wrap: wrap;
     margin-bottom: 10px;
     align-items: center;
     justify-content: center;
 }
 
 #task_input {
+    flex: 1;
     margin-right: 1%;
-    width: 50%;
+    width: 100%;
     padding: 10px;
     font-size: 16px;
     color: #1935d2;
@@ -81,6 +84,7 @@ li {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
     /* color: aqua; */
 }
 
@@ -139,6 +143,7 @@ li {
 
 .task_info {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-evenly;
     align-items: center;
     font-size: 12px;
@@ -149,6 +154,10 @@ li {
 .task_info select,
 .task_info input {
     background-color: #f3f7fb;
+}
+
+.category_container {
+    margin: 0 5px;
 }
 
 /* .priority_container,
