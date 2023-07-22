@@ -26,7 +26,7 @@
                 </div>
                 <div class="category_container">
                     <div>Set Category</div>
-                    <input type="text" id="category_input" placeholder="Enter a category">
+                    <input type="text" id="task_category" placeholder="Enter a category">
                 </div>
                 <div class="due_date_container">
                     <div>Set Due Date</div>
@@ -36,19 +36,42 @@
 
             <button id="add_button">Add</button>
         </div>
+        <div class="filter_tasks">
+            <div class="filter_container">
+                <label for="filter_priority">Filter by Priority:</label>
+                <select id="filter_priority">
+                    <option value="All">All</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                </select>
+            </div>
+
+            <div class="filter_container">
+                <label for="filter_category">Filter by Category:</label>
+                <input type="text" id="filter_category" placeholder="Enter a category">
+            </div>
+
+            <div class="filter_container date_container">
+                <div class="s_date"><label for="start_date">Start Date:</label>
+                    <input type="date" id="start_date">
+                </div>
+                <div class="e_date"><label for="end_date">End Date:</label>
+                    <input type="date" id="end_date">
+                </div>
+
+
+            </div>
+
+            <button id="filter_button">Filter</button>
+        </div>
+
+
+
 
         <button id="show_button">Show List</button>
 
-        <div id="filter_container">
-            <label for="priority_filter">Filter by Priority:</label>
-            <select id="priority_filter">
-                <option value="All">All</option>
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-            </select>
-            <button id="priority_filter_button">Filter</button>
-        </div>
+
 
         <ul id="task_list"></ul>
     </div>

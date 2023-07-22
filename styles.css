@@ -20,9 +20,6 @@ body {
     background-color: #BAD7E9;
     padding: 20px;
     border-radius: 10px;
-    /* display: flex;
-    flex-direction: column;
-    justify-content: center; */
 }
 
 h1 {
@@ -124,6 +121,14 @@ li {
     margin-left: 20px;
 }
 
+#filter_button {
+    font-size: 14px;
+    color: white;
+    background-color: rgba(3, 108, 82, 0.623);
+    cursor: pointer;
+    border-radius: 5px;
+}
+
 .edit_button:hover {
     background-color: darkblue;
 }
@@ -160,8 +165,14 @@ li {
     margin: 0 5px;
 }
 
-/* .priority_container,
-category_container,
-due_date_container {
-    margin: 1%;
-} */
+.filter_tasks {
+    margin-top: 4%;
+    margin-bottom: 4%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.date_container {
+    display: felx;
+}

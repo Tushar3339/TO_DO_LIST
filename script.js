@@ -53,7 +53,7 @@ function addTask() {
 // parameter2:priorityFilter -->
 //                 The tasks will be displayed for the given priority
 
-function showList(isCallFromOtherFunction, priorityFilter = "All") {
+function showList(isCallFromOtherFunction, filteredTasks) {
     taskList = document.getElementById('task_list');
 
     // This if condition will toggle the display of tasklist, so when user clicks on showlist again, it will disappear
@@ -61,17 +61,12 @@ function showList(isCallFromOtherFunction, priorityFilter = "All") {
         taskList.style.display = 'block';
         taskList.innerHTML = '';
 
-        let filteredTasks;
-        if (priorityFilter !== "All") {
-            filteredTasks = tasks.filter(task => task.priority === priorityFilter);
-        } else {
-            filteredTasks = tasks;
-        }
+        const tasksToShow = filteredTasks && filteredTasks.length > 0 ? filteredTasks : tasks;
 
-        if (filteredTasks.length === 0) {
+        if (tasksToShow.length === 0) {
             taskList.innerHTML = '<li>No tasks found</li>';
         } else {
-            for (const task of filteredTasks) {
+            for (const task of tasksToShow) {
                 const listItem = document.createElement('li');
                 listItem.id = `${task.id}`;
                 setListItemInnerHtml(listItem, task);
@@ -172,32 +167,6 @@ function getSpanOfButtons(task) {
 }
 
 
-let addButton = document.getElementById('add_button');
-let showButton = document.getElementById('show_button');
-let priorityFilterButton = document.getElementById('priority_filter_button');
-addButton.addEventListener('click', addTask);
-showButton.addEventListener('click', function () {
-    showList(false);
-});
-
-priorityFilterButton.addEventListener('click', function () {
-    let priorityFilter = document.getElementById('priority_filter').value;
-    console.log(priorityFilter);
-    showList(true, priorityFilter);
-});
-
-document.addEventListener('keypress', function (event) {
-    if (event.key === 'Enter') {
-        addTask();
-    }
-})
-
-window.addEventListener('DOMContentLoaded', function () {
-    // Retriving the content from local storage
-    retrieveFromLocalStorage();
-    //localStorage.clear();
-});
-
 
 function toggleTaskStatus(taskId) {
     const task = tasks.find(task => task.id === taskId);
@@ -239,3 +208,56 @@ function showTaskDetails(task) {
 }
 
 
+function isPriorityMatching(task) {
+    const priorityFilter = document.getElementById('filter_priority').value;
+    return priorityFilter === 'All' || task.priority === priorityFilter;
+}
+
+function isCategoryMatching(task) {
+    const categoryFilter = document.getElementById('filter_category').value;
+    return categoryFilter === '' || task.category.toLowerCase().includes(categoryFilter.toLowerCase());
+}
+
+function isDueDateMatching(task) {
+
+    const startDateFilter = document.getElementById('start_date').value;
+    const endDateFilter = document.getElementById('end_date').value;
+
+    return (startDateFilter === '' && endDateFilter === '') ||
+        (startDateFilter === '' && task.dueDate <= endDateFilter) ||
+        (endDateFilter === '' && task.dueDate >= startDateFilter) ||
+        (task.dueDate >= startDateFilter && task.dueDate <= endDateFilter);
+}
+function filterTasks() {
+
+    const filteredTasks = tasks.filter(task => {
+        return isPriorityMatching(task) && isCategoryMatching(task) && isDueDateMatching(task);
+    });
+
+    showList(true, filteredTasks);
+}
+
+
+const addButton = document.getElementById('add_button');
+const showButton = document.getElementById('show_button');
+
+addButton.addEventListener('click', addTask);
+showButton.addEventListener('click', function () {
+    showList(false);
+});
+
+const filterButton = document.getElementById('filter_button');
+filterButton.addEventListener('click', filterTasks);
+
+
+document.addEventListener('keypress', function (event) {
+    if (event.key === 'Enter') {
+        addTask();
+    }
+})
+
+window.addEventListener('DOMContentLoaded', function () {
+    // Retriving the content from local storage
+    retrieveFromLocalStorage();
+    //localStorage.clear();
+});
