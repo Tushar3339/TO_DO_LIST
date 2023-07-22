@@ -20,8 +20,8 @@ function addTask() {
         // Getting the priority value for the task
         let priorityInput = document.getElementById('task_priority');
         taskPriority.push(priorityInput.value);
-        console.log(priorityInput.value);
-        console.log(taskPriority);
+        //console.log(priorityInput.value);
+        //console.log(taskPriority);
 
         let categoryInput = document.getElementById('task_category');
         taskCategory.push(categoryInput.value);
@@ -33,29 +33,49 @@ function addTask() {
 
         taskList = document.getElementById('task_list');
 
-        // The following code is added so that when list is being viewed and user adds tak, then it should reflect in list
-        // As the display gets toggled in showlist code so we are setting it none here, so it will get toggled to block in showlist()
+        // The following code is added so that when list is being viewed and user adds task, then it should reflect in list
         if (taskList.style.display === 'block') {
-            taskList.style.display = 'none';
-            showList();
+            showList(true);
         }
     }
     // saving the content to local storage
     saveToLocalStorage();
 }
 
-function showList() {
+// Function:showList --> This function will show all the tasks when clicking show list button or when called from other functions.
+// parameter1:isCallFromOtherFunction --> 
+//                 this is true by default, so when it gets called from other functions we show the tasks.
+//                 If user click on show list button when the tasks are shown, then we will hide the tasks.
+
+// parameter2:priorityFilter -->
+//                 The tasks will be displayed for the given priority
+
+
+
+function showList(isCallFromOtherFunction, priorityFilter = "All") {
     taskList = document.getElementById('task_list');
 
     // This if condition will toggle the display of tasklist, so when user clicks on showlist again, it will disappear
-    if (taskList.style.display === 'none') {
+    if (taskList.style.display !== 'block' || isCallFromOtherFunction) {
         taskList.style.display = 'block';
         taskList.innerHTML = '';
 
-        if (tasks.length === 0) {
+        if (priorityFilter !== "All") {
+            filteredTasks = [];
+            for (let i = 0; i < tasks.length; i++) {
+                if (taskPriority[i] === priorityFilter) {
+                    filteredTasks.push(i);
+                }
+            }
+        } else {
+            // If "All" is selected, show all tasks
+            filteredTasks = tasks.map((_, index) => index);
+        }
+
+        if (filteredTasks.length === 0) {
             taskList.innerHTML = '<li>No tasks found</li>';
         } else {
-            for (let i = 0; i < tasks.length; i++) {
+            for (let i of filteredTasks) {
                 listItem = document.createElement('li');
                 setListItemInnerHtml(listItem, i);
 
@@ -75,10 +95,8 @@ function deleteTask(index) {
     taskPriority.splice(index, 1);
     taskCategory.splice(index, 1);
     taskDueDate.splice(index, 1);
-    // As the display gets toggled in showlist code so we are setting it none here, so it will get toggled to block in showlist()
-    taskList = document.getElementById('task_list');
-    taskList.style.display = 'none';
-    showList();
+
+    showList(true);
 
     // Saving the content to local storage
     saveToLocalStorage();
@@ -159,8 +177,17 @@ function getSpanOfButtons(index) {
 
 let addButton = document.getElementById('add_button');
 let showButton = document.getElementById('show_button');
+let filterButton = document.getElementById('filter_button');
 addButton.addEventListener('click', addTask);
-showButton.addEventListener('click', showList);
+showButton.addEventListener('click', function () {
+    showList(false);
+});
+
+filterButton.addEventListener('click', function () {
+    let priorityFilter = document.getElementById('priority_filter').value;
+    console.log(priorityFilter);
+    showList(true, priorityFilter);
+});
 
 document.addEventListener('keypress', function (event) {
     if (event.key === 'Enter') {
@@ -172,9 +199,6 @@ window.addEventListener('DOMContentLoaded', function () {
     // Retriving the content from local storage
     retrieveFromLocalStorage();
     //localStorage.clear();
-
-    taskList = document.getElementById('task_list');
-    taskList.style.display = 'None'
 });
 
 
@@ -227,27 +251,23 @@ function retrieveFromLocalStorage() {
 
 // This function will display the information about tasks after clicking on Info button
 function showTaskDetails(index) {
-    detailsSpan = document.querySelector(`.task_info_${index}`);
+    taskInfoSpan = document.querySelector(`.task_info_${index}`);
     priority = taskPriority[index];
     category = taskCategory[index];
     dueDate = taskDueDate[index];
 
 
     // Check if the details are currently visible
-    isDetailsVisible = detailsSpan.innerHTML !== '';
+    isInfoVisible = taskInfoSpan.innerHTML !== '';
 
-    if (isDetailsVisible) {
+    if (isInfoVisible) {
         // If the details are visible, hide them.
-        detailsSpan.innerHTML = '';
+        taskInfoSpan.innerHTML = '';
     } else {
         // If the details are hidden, set the details.
-        detailsSpan.innerHTML = `<br>Priority: ${priority}<br>Category: ${category}<br>Due Date: ${dueDate}`;
+        taskInfoSpan.innerHTML = `<br>Priority: ${priority}<br>Category: ${category}<br>Due Date: ${dueDate}`;
     }
 
-    // // Display the details in the span element
-    // detailsSpan.innerHTML = `<br>Priority: ${priority}<br>Category: ${category}<br>Due Date: ${dueDate}`;
-
-    // // Hide the info button after showing the details
-    // infoButton = document.querySelectorAll(`.info_button`)[index];
-    // infoButton.style.display = "none";
 }
+
+
