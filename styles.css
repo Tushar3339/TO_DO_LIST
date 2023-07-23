@@ -60,12 +60,7 @@ h1 {
     background-color: #80669d;
 }
 
-#show_button {
-    padding: 5px 10px;
-    font-size: 16px;
-    border-radius: 5px;
-    cursor: pointer;
-}
+
 
 #task_list {
     list-style-type: none;
@@ -106,6 +101,24 @@ li {
 
 .delete_button:hover {
     background-color: darkred;
+}
+
+button {
+
+    font-size: 14px;
+    color: white;
+    background-color: rgba(3, 108, 82, 0.623);
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+#show_button {
+    padding: 5px 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+
+
 }
 
 .edit_button {
@@ -200,4 +213,8 @@ li {
     flex-direction: column;
     flex-wrap: wrap;
     overflow: hidden;
+}
+
+.search_options {
+    margin: 2%;
 }

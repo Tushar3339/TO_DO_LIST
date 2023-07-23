@@ -347,18 +347,36 @@ function deleteSubtask(taskId, subtaskId) {
     }
 }
 
-function editSubtask(taskId, subtaskId, newSubtaskName) {
-    const task = tasks.find(task => task.id === taskId);
-    if (task) {
-        const subtask = task.subtasks.find(subtask => subtask.id === subtaskId);
-        if (subtask) {
-            subtask.name = newSubtaskName;
-            saveToLocalStorage();
-            showList(true);
-        }
+// function editSubtask(taskId, subtaskId, newSubtaskName) {
+//     const task = tasks.find(task => task.id === taskId);
+//     if (task) {
+//         const subtask = task.subtasks.find(subtask => subtask.id === subtaskId);
+//         if (subtask) {
+//             subtask.name = newSubtaskName;
+//             saveToLocalStorage();
+//             showList(true);
+//         }
+//     }
+// }
+
+
+function showBacklogs() {
+
+    const now = new Date();
+    console.log('hii' + now);
+    const backlogs = tasks.filter(task => new Date(task.dueDate) < now && !task.status);
+
+    if (backlogs.length === 0) {
+        alert("No Backlogs");
     }
+
+    showList(true, backlogs);
 }
 
+const viewBacklogsButton = document.getElementById('view_backlogs_button');
+viewBacklogsButton.addEventListener('click', function () {
+    showBacklogs();
+});
 
 const addButton = document.getElementById('add_button');
 const showButton = document.getElementById('show_button');
