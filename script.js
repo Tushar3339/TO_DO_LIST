@@ -39,7 +39,6 @@ function addTask() {
 }
 
 
-
 // Function:showList --> This function will show all the tasks when clicking show list button or when called from other functions.
 // parameter1:isCallFromOtherFunction --> 
 //                 this is true by default, so when it gets called from other functions we show the tasks.
@@ -64,25 +63,9 @@ function showList(isCallFromOtherFunction, filteredTasks) {
             for (const task of tasksToShow) {
                 const listItem = document.createElement('li');
                 listItem.id = `${task.id}`;
-                const sDiv = document.createElement('div');
-                sDiv.classList.add(`s_task`);
-                sDiv.classList.add(`s_${task.id}`);
 
-                const subtaskButton = document.createElement('button');
-                subtaskButton.innerHTML = 'Subtasks';
-                subtaskButton.addEventListener('click', function () {
-                    toggleSubtasksVisibility(task.id);
-                });
-                sDiv.appendChild(subtaskButton);
+                setListItemInnerHtml(listItem, task);
 
-                listItem.appendChild(sDiv);
-
-                const x = listItem.querySelector(`.s_${task.id}`);
-                console.log('hiiii');
-                console.log(x);
-                setListItemInnerHtml(listItem, task, sDiv);
-
-                listItem.appendChild(sDiv);
                 const taskButtons = getSpanOfButtons(task);
                 listItem.appendChild(taskButtons);
                 taskList.appendChild(listItem);
@@ -126,78 +109,78 @@ function saveTask(task, newTaskName) {
     task.name = newTaskName;
     const listItem = document.getElementById(`${task.id}`);
 
-    const sDiv = document.createElement('div');
-    sDiv.classList.add(`s_task`);
-    sDiv.classList.add(`s_${task.id}`);
-    listItem.appendChild(sDiv);
+    setListItemInnerHtml(listItem, task);
 
-    const subtaskButton = document.createElement('button');
-    subtaskButton.innerHTML = 'Subtasks';
-    subtaskButton.addEventListener('click', function () {
-        toggleSubtasksVisibility(task.id);
-    });
-    sDiv.appendChild(subtaskButton)
-
-    setListItemInnerHtml(listItem, task, sDiv);
-
-    listItem.appendChild(sDiv);
     const taskButtons = getSpanOfButtons(task);
     listItem.appendChild(taskButtons);
 
     saveToLocalStorage();
 }
 
-function setListItemInnerHtml(listItem, task, ssDiv = null) {
+function addSubtaskontent(subtaskOuterContainer, task) {
+    const subtaskContainer = document.createElement('div');
+    subtaskContainer.classList.add('subtask-container');
+    subtaskContainer.id = `subtask_container_${task.id}`;
+
+    const subtaskInput = document.createElement('input');
+    subtaskInput.type = 'text';
+    subtaskInput.id = `subtask_input_${task.id}`;
+    subtaskInput.placeholder = 'Add subtask';
+
+    const addSubtaskButton = document.createElement('button');
+    addSubtaskButton.innerHTML = 'Add Subtask';
+    addSubtaskButton.addEventListener('click', function () {
+        addSubtask(task.id, document.getElementById(`subtask_input_${task.id}`).value);
+    });
+
+    subtaskContainer.appendChild(subtaskInput);
+    subtaskContainer.appendChild(addSubtaskButton);
+
+    subtaskOuterContainer.appendChild(subtaskContainer);
+    if (task.subtasks.length > 0) {
+
+        const subTaskListContainer = document.createElement('div');
+
+        for (const subtask of task.subtasks) {
+            const subtaskElement = document.createElement('div');
+            subtaskElement.classList.add('subTask_element')
+            subtaskElement.innerHTML = `
+        <input type="checkbox" id="checkbox_${subtask.id}" onclick="toggleSubtaskStatus(${task.id}, ${subtask.id})" ${subtask.status ? "checked" : ""}>
+        <span id="subtask_content_${subtask.id}">${subtask.name}</span>
+        <button class = "delete_subtask_button" onclick="deleteSubtask(${task.id}, ${subtask.id})">Delete</button>
+    `;
+
+
+            subTaskListContainer.appendChild(subtaskElement);
+        }
+        subtaskOuterContainer.appendChild(subTaskListContainer);
+    }
+}
+
+function setListItemInnerHtml(listItem, task) {
     listItem.innerHTML = `
         <input type="checkbox" id="checkbox_${task.id}" onclick="toggleTaskStatus(${task.id})" ${task.status ? "checked" : ""}>
         <span id="task_content_${task.id}" onclick="toggleSubtasksVisibility(${task.id})">${task.name}</span>
     `;
 
+    const subtaskOuterContainer = document.createElement('div');
+    subtaskOuterContainer.classList.add(`s_task`);
+    subtaskOuterContainer.classList.add(`s_${task.id}`);
+    listItem.appendChild(subtaskOuterContainer);
+
+    const subtasksButton = document.createElement('button');
+    subtasksButton.innerHTML = 'Subtasks';
+    subtasksButton.addEventListener('click', function () {
+        toggleSubtasksVisibility(task.id);
+    });
+    subtaskOuterContainer.appendChild(subtasksButton);
+
     if (task.showSubtasks) {
-        const subtaskContainer = document.createElement('div');
-        subtaskContainer.classList.add('subtask-container');
-        subtaskContainer.id = `subtask_container_${task.id}`;
 
-        const subtaskInput = document.createElement('input');
-        subtaskInput.type = 'text';
-        subtaskInput.id = `subtask_input_${task.id}`;
-        subtaskInput.placeholder = 'Add subtask';
-
-        const subtaskButton = document.createElement('button');
-        subtaskButton.innerHTML = 'Add Subtask';
-        subtaskButton.addEventListener('click', function () {
-            addSubtask(task.id, document.getElementById(`subtask_input_${task.id}`).value);
-        });
-        const sDiv = listItem.querySelector(`.s_${task.id}`);
-        const x = listItem.querySelector(`.s_${task.id}`);
-        console.log(sDiv + "bjbm n" + x + ssDiv);
-
-        subtaskContainer.appendChild(subtaskInput);
-        subtaskContainer.appendChild(subtaskButton);
-
-        ssDiv.appendChild(subtaskContainer);
-        // listItem.appendChild(subtaskContainer);
-        if (task.subtasks.length > 0) {
-
-            const subTaskListContainer = document.createElement('div');
-
-            for (const subtask of task.subtasks) {
-                const subtaskElement = document.createElement('div');
-                subtaskElement.classList.add('subTask_element')
-                subtaskElement.innerHTML = `
-            <input type="checkbox" id="checkbox_${subtask.id}" onclick="toggleSubtaskStatus(${task.id}, ${subtask.id})" ${subtask.status ? "checked" : ""}>
-            <span id="subtask_content_${subtask.id}">${subtask.name}</span>
-            <button class = "delete_subtask_button" onclick="deleteSubtask(${task.id}, ${subtask.id})">Delete</button>
-        `;
-
-
-                subTaskListContainer.appendChild(subtaskElement);
-                // listItem.appendChild(subtaskElement);
-            }
-            ssDiv.appendChild(subTaskListContainer);
-        }
+        addSubtaskontent(subtaskOuterContainer, task);
 
     }
+    listItem.appendChild(subtaskOuterContainer);
 }
 
 function getSpanOfButtons(task) {

@@ -187,6 +187,17 @@ li {
 }
 
 .subTask_element {
+    padding: 2%;
     background-color: #c6e9cd;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
 
+}
+
+.s_task {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    overflow: hidden;
 }
