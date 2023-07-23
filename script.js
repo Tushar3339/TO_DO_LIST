@@ -6,6 +6,7 @@ let taskIdCounter = 0;
 function addTask() {
     const taskInput = document.getElementById('task_input');
     const taskName = taskInput.value;
+
     if (taskName.trim() !== '') {
 
         const priorityInput = document.getElementById('task_priority');
@@ -19,6 +20,8 @@ function addTask() {
             priority: priorityInput.value,
             category: categoryInput.value,
             dueDate: dueDateInput.value,
+            showSubtasks: false,
+            subtasks: []
         };
         tasks.push(newTask);
         taskInput.value = '';
@@ -61,8 +64,25 @@ function showList(isCallFromOtherFunction, filteredTasks) {
             for (const task of tasksToShow) {
                 const listItem = document.createElement('li');
                 listItem.id = `${task.id}`;
-                setListItemInnerHtml(listItem, task);
+                const sDiv = document.createElement('div');
+                sDiv.classList.add(`s_task`);
+                sDiv.classList.add(`s_${task.id}`);
 
+                const subtaskButton = document.createElement('button');
+                subtaskButton.innerHTML = 'Subtasks';
+                subtaskButton.addEventListener('click', function () {
+                    toggleSubtasksVisibility(task.id);
+                });
+                sDiv.appendChild(subtaskButton);
+
+                listItem.appendChild(sDiv);
+
+                const x = listItem.querySelector(`.s_${task.id}`);
+                console.log('hiiii');
+                console.log(x);
+                setListItemInnerHtml(listItem, task, sDiv);
+
+                listItem.appendChild(sDiv);
                 const taskButtons = getSpanOfButtons(task);
                 listItem.appendChild(taskButtons);
                 taskList.appendChild(listItem);
@@ -105,20 +125,79 @@ function editTask(task) {
 function saveTask(task, newTaskName) {
     task.name = newTaskName;
     const listItem = document.getElementById(`${task.id}`);
-    setListItemInnerHtml(listItem, task);
 
+    const sDiv = document.createElement('div');
+    sDiv.classList.add(`s_task`);
+    sDiv.classList.add(`s_${task.id}`);
+    listItem.appendChild(sDiv);
+
+    const subtaskButton = document.createElement('button');
+    subtaskButton.innerHTML = 'Subtasks';
+    subtaskButton.addEventListener('click', function () {
+        toggleSubtasksVisibility(task.id);
+    });
+    sDiv.appendChild(subtaskButton)
+
+    setListItemInnerHtml(listItem, task, sDiv);
+
+    listItem.appendChild(sDiv);
     const taskButtons = getSpanOfButtons(task);
     listItem.appendChild(taskButtons);
 
     saveToLocalStorage();
 }
 
-function setListItemInnerHtml(listItem, task) {
+function setListItemInnerHtml(listItem, task, ssDiv = null) {
     listItem.innerHTML = `
-    <input type="checkbox" id="checkbox_${task.id}" onclick="toggleTaskStatus(${task.id})" ${task.status ? "checked" : ""}>
-        <span id="task_content_${task.id}">${task.name}</span>
-                
-`;
+        <input type="checkbox" id="checkbox_${task.id}" onclick="toggleTaskStatus(${task.id})" ${task.status ? "checked" : ""}>
+        <span id="task_content_${task.id}" onclick="toggleSubtasksVisibility(${task.id})">${task.name}</span>
+    `;
+
+    if (task.showSubtasks) {
+        const subtaskContainer = document.createElement('div');
+        subtaskContainer.classList.add('subtask-container');
+        subtaskContainer.id = `subtask_container_${task.id}`;
+
+        const subtaskInput = document.createElement('input');
+        subtaskInput.type = 'text';
+        subtaskInput.id = `subtask_input_${task.id}`;
+        subtaskInput.placeholder = 'Add subtask';
+
+        const subtaskButton = document.createElement('button');
+        subtaskButton.innerHTML = 'Add Subtask';
+        subtaskButton.addEventListener('click', function () {
+            addSubtask(task.id, document.getElementById(`subtask_input_${task.id}`).value);
+        });
+        const sDiv = listItem.querySelector(`.s_${task.id}`);
+        const x = listItem.querySelector(`.s_${task.id}`);
+        console.log(sDiv + "bjbm n" + x + ssDiv);
+
+        subtaskContainer.appendChild(subtaskInput);
+        subtaskContainer.appendChild(subtaskButton);
+
+        ssDiv.appendChild(subtaskContainer);
+        // listItem.appendChild(subtaskContainer);
+        if (task.subtasks.length > 0) {
+
+            const subTaskListContainer = document.createElement('div');
+
+            for (const subtask of task.subtasks) {
+                const subtaskElement = document.createElement('div');
+                subtaskElement.classList.add('subTask_element')
+                subtaskElement.innerHTML = `
+            <input type="checkbox" id="checkbox_${subtask.id}" onclick="toggleSubtaskStatus(${task.id}, ${subtask.id})" ${subtask.status ? "checked" : ""}>
+            <span id="subtask_content_${subtask.id}">${subtask.name}</span>
+            <button class = "delete_subtask_button" onclick="deleteSubtask(${task.id}, ${subtask.id})">Delete</button>
+        `;
+
+
+                subTaskListContainer.appendChild(subtaskElement);
+                // listItem.appendChild(subtaskElement);
+            }
+            ssDiv.appendChild(subTaskListContainer);
+        }
+
+    }
 }
 
 function getSpanOfButtons(task) {
@@ -168,17 +247,33 @@ function toggleTaskStatus(taskId) {
     }
 }
 
+function toggleSubtasksVisibility(taskId) {
+    const task = tasks.find(task => task.id === taskId);
+    if (task) {
+        task.showSubtasks = !task.showSubtasks;
+        showList(true);
+        saveToLocalStorage();
+
+    }
+}
+
 function saveToLocalStorage() {
 
     localStorage.setItem('tasks', JSON.stringify(tasks));
+    localStorage.setItem('taskIdCounter', JSON.stringify(taskIdCounter))
 }
 
 function retrieveFromLocalStorage() {
 
     const savedTasks = localStorage.getItem('tasks');
+    const savedTaskIdCounter = localStorage.getItem('taskIdCounter');
 
     if (savedTasks) {
         tasks = JSON.parse(savedTasks);
+    }
+
+    if (savedTaskIdCounter) {
+        taskIdCounter = JSON.parse(savedTaskIdCounter);
     }
 }
 
@@ -230,6 +325,58 @@ function filterTasks() {
 }
 
 
+function addSubtask(taskId, subtaskName) {
+    const task = tasks.find(task => task.id === taskId);
+    if (task) {
+
+        const newSubtask = {
+            id: taskIdCounter++,
+            name: subtaskName,
+            status: false,
+        };
+        task.subtasks.push(newSubtask);
+        saveToLocalStorage();
+        showList(true);
+    }
+}
+
+
+function toggleSubtaskStatus(taskId, subtaskId) {
+    const task = tasks.find(task => task.id === taskId);
+    if (task) {
+        const subtask = task.subtasks.find(subtask => subtask.id === subtaskId);
+        if (subtask) {
+            subtask.status = !subtask.status;
+            saveToLocalStorage();
+        }
+    }
+}
+
+function deleteSubtask(taskId, subtaskId) {
+    const task = tasks.find(task => task.id === taskId);
+    if (task) {
+        const subtaskIndex = task.subtasks.findIndex(subtask => subtask.id === subtaskId);
+        if (subtaskIndex !== -1) {
+            task.subtasks.splice(subtaskIndex, 1);
+            saveToLocalStorage();
+            showList(true);
+        }
+    }
+}
+
+function editSubtask(taskId, subtaskId, newSubtaskName) {
+    const task = tasks.find(task => task.id === taskId);
+    if (task) {
+        const subtask = task.subtasks.find(subtask => subtask.id === subtaskId);
+        if (subtask) {
+            subtask.name = newSubtaskName;
+            saveToLocalStorage();
+            showList(true);
+        }
+    }
+}
+
+
 const addButton = document.getElementById('add_button');
 const showButton = document.getElementById('show_button');
 
@@ -251,5 +398,5 @@ document.addEventListener('keypress', function (event) {
 window.addEventListener('DOMContentLoaded', function () {
     // Retriving the content from local storage
     retrieveFromLocalStorage();
-    localStorage.clear();
+    //localStorage.clear();
 });
