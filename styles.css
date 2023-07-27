@@ -69,15 +69,45 @@ h1 {
 }
 
 li {
-    margin-bottom: 10px;
+
     background-color: #FFF;
     padding: 10px;
-    border-radius: 5px;
+    border-radius: 5px 5px 0 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     /* color: aqua; */
+}
+
+.task_container {
+    margin-bottom: 10px;
+}
+
+.edit_button {
+    padding: 5px 10px;
+    font-size: 14px;
+    color: white;
+    background-color: blue;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-right: 5px;
+    margin-left: 20px;
+}
+
+.edit_button:hover,
+.edit_subtask_button:hover {
+    background-color: darkblue;
+}
+
+.edit_subtask_button {
+    font-size: 13px;
+    color: white;
+    background-color: blue;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-right: 5px;
 }
 
 .delete_button {
@@ -99,7 +129,10 @@ li {
     border-radius: 5px;
 }
 
-.delete_button:hover {
+
+
+.delete_button:hover,
+.delete_subtask_button:hover {
     background-color: darkred;
 }
 
@@ -121,16 +154,7 @@ button {
 
 }
 
-.edit_button {
-    padding: 5px 10px;
-    font-size: 14px;
-    color: white;
-    background-color: blue;
-    cursor: pointer;
-    border-radius: 5px;
-    margin-right: 5px;
-    margin-left: 20px;
-}
+
 
 .info_button {
     padding: 5px 10px;
@@ -151,9 +175,7 @@ button {
     border-radius: 5px;
 }
 
-.edit_button:hover {
-    background-color: darkblue;
-}
+
 
 .save_button {
     padding: 5px 10px;
@@ -199,16 +221,28 @@ button {
     display: felx;
 }
 
-.subTask_element {
+.subtask_element {
     padding: 2%;
     background-color: #c6e9cd;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-
+    align-items: center;
 }
 
-.s_task {
+.subtask_element input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.subtask_element button {
+    margin-left: auto;
+}
+
+.subtask_element input[type="text"] {
+    flex: 1;
+}
+
+.subtask_container {
     display: flex;
     flex-direction: column;
     flex-wrap: wrap;
@@ -217,4 +251,13 @@ button {
 
 .search_options {
     margin: 2%;
+}
+
+.suntask_liElement {
+    flex-grow: 1;
+
+    padding: 12px;
+
+    overflow-y: auto;
+    height: 90px;
 }

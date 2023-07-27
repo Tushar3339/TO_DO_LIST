@@ -1,34 +1,17 @@
-// TUshar anil adhav
 // Array to store tasks
 let tasks = [];
 let taskIdCounter = 0;
 
 function addTask() {
-    const taskInput = document.getElementById('task_input');
-    const taskName = taskInput.value;
 
-    if (taskName.trim() !== '') {
+    const taskData = getTaskInputData();
 
-        const priorityInput = document.getElementById('task_priority');
-        const categoryInput = document.getElementById('task_category');
-        const dueDateInput = document.getElementById('task_due_date');
+    if (taskData.name.trim() !== '') {
 
-        const newTask = {
-            id: taskIdCounter++,
-            name: taskName,
-            status: false,
-            priority: priorityInput.value,
-            category: categoryInput.value,
-            dueDate: dueDateInput.value,
-            showSubtasks: false,
-            subtasks: []
-        };
-        tasks.push(newTask);
-        taskInput.value = '';
-        categoryInput.value = '';
+        createNewTask(taskData);
+        clearTaskInputFields();
 
         const taskList = document.getElementById('task_list');
-
         // The following code is added so that when list is being viewed and user adds task, then it should reflect in list
         if (taskList.style.display === 'block') {
             showList(true);
@@ -36,6 +19,46 @@ function addTask() {
     }
     // saving the content to local storage
     saveToLocalStorage();
+}
+
+function getTaskInputData() {
+    const taskInput = document.getElementById('task_input');
+    const taskName = taskInput.value;
+    const priorityInput = document.getElementById('task_priority');
+    const categoryInput = document.getElementById('task_category');
+    const dueDateInput = document.getElementById('task_due_date');
+
+    const taskInputData = {
+
+        name: taskName,
+        priority: priorityInput.value,
+        category: categoryInput.value,
+        dueDate: dueDateInput.value,
+    };
+
+    return taskInputData;
+}
+
+function createNewTask(taskData) {
+    const newTask = {
+        id: taskIdCounter++,
+        name: taskData.name,
+        status: false,
+        priority: taskData.priority,
+        category: taskData.category,
+        dueDate: taskData.dueDate,
+        showSubtasks: false,
+        subtasks: [],
+    };
+    tasks.push(newTask);
+}
+
+function clearTaskInputFields() {
+    const taskInput = document.getElementById('task_input');
+    const categoryInput = document.getElementById('task_category');
+
+    taskInput.value = '';
+    categoryInput.value = '';
 }
 
 
@@ -61,20 +84,146 @@ function showList(isCallFromOtherFunction, filteredTasks) {
             taskList.innerHTML = '<li>No tasks found</li>';
         } else {
             for (const task of tasksToShow) {
-                const listItem = document.createElement('li');
-                listItem.id = `${task.id}`;
 
-                setListItemInnerHtml(listItem, task);
-
-                const taskButtons = getSpanOfButtons(task);
-                listItem.appendChild(taskButtons);
-                taskList.appendChild(listItem);
+                const taskContainer = createTaskContainer(task);
+                taskList.appendChild(taskContainer);
             }
         }
     } else {
         taskList.style.display = 'none';
     }
 }
+
+function createTaskContainer(task) {
+    const taskContainer = document.createElement('div');
+    taskContainer.classList.add('task_container');
+
+    createListItem(taskContainer, task);
+    createSubtaskContainer(taskContainer, task)
+
+    return taskContainer;
+}
+
+function createListItem(taskContainer, task) {
+
+    const listItem = document.createElement('li');
+    listItem.id = `${task.id}`;
+
+    listItem.innerHTML = renderTaskContent(task);
+    const taskButtons = createButtonsSpan(task);
+    listItem.appendChild(taskButtons);
+
+    taskContainer.appendChild(listItem);
+}
+
+function createSubtaskContainer(taskContainer, task) {
+
+    const subtaskContainer = document.createElement('div');
+    subtaskContainer.classList.add(`subtask_container`);
+
+    const subtasksButton = createButton('Subtasks', 'subtask_button', () => toggleSubtasksVisibility(task.id));
+    subtaskContainer.appendChild(subtasksButton);
+
+    if (task.showSubtasks) {
+        addSubtaskontent(subtaskContainer, task);
+    }
+
+    taskContainer.appendChild(subtaskContainer);
+}
+
+
+
+function addSubtaskontent(subtaskContainer, task) {
+    const subtaskInputBox = document.createElement('div');
+
+    const subtaskInput = document.createElement('input');
+    subtaskInput.type = 'text';
+    subtaskInput.id = `subtask_input_${task.id}`;
+    subtaskInput.placeholder = 'Add subtask';
+
+
+    const addSubtaskButton = createButton('Add Subtask', 'add_subtask_button', () => addSubtask(task.id, getSubTaskInputContent(task)))
+
+
+    subtaskInputBox.appendChild(subtaskInput);
+    subtaskInputBox.appendChild(addSubtaskButton);
+
+    subtaskContainer.appendChild(subtaskInputBox);
+    if (task.subtasks.length > 0) {
+
+        const subTaskListContainer = document.createElement('div');
+        subTaskListContainer.classList.add(`suntask_liElement`);
+
+        for (const subtask of task.subtasks) {
+            createSubtaskElement(task, subtask, subTaskListContainer);
+        }
+        subtaskContainer.appendChild(subTaskListContainer);
+    }
+}
+
+function createSubtaskElement(task, subtask, subTaskListContainer) {
+    const subtaskElement = document.createElement('div');
+    subtaskElement.classList.add('subtask_element');
+
+    const subtaskCheckbox = document.createElement('input');
+    subtaskCheckbox.type = 'checkbox';
+    subtaskCheckbox.id = `checkbox_${subtask.id}`;
+    subtaskCheckbox.checked = subtask.status;
+    subtaskCheckbox.addEventListener('click', () => toggleSubtaskStatus(task.id, subtask.id));
+
+    const subtaskContent = document.createElement('span');
+    subtaskContent.id = `subtask_content_${subtask.id}`;
+    subtaskContent.textContent = subtask.name;
+    subtaskContent.addEventListener('click', () => toggleSubtaskStatus(task.id, subtask.id));
+
+    const editSubtaskButton = createButton('Edit', 'edit_subtask_button', () => editSubtask(task.id, subtask.id, subtaskContent));
+    const deleteSubtaskButton = createButton('Delete', 'delete_subtask_button', () => deleteSubtask(task.id, subtask.id));
+
+    const subtaskButtonspan = document.createElement('span');
+    subtaskButtonspan.appendChild(editSubtaskButton);
+    subtaskButtonspan.appendChild(deleteSubtaskButton);
+
+    subtaskElement.appendChild(subtaskCheckbox);
+    subtaskElement.appendChild(subtaskContent);
+    subtaskElement.appendChild(subtaskButtonspan);
+
+    subTaskListContainer.appendChild(subtaskElement);
+}
+
+function editSubtask(taskId, subtaskId, subtaskContent) {
+    const task = tasks.find(task => task.id === taskId);
+    if (task) {
+        const subtask = task.subtasks.find(subtask => subtask.id === subtaskId);
+        if (subtask) {
+            const subtaskInput = document.createElement('input');
+            subtaskInput.type = 'text';
+            subtaskInput.value = subtask.name;
+
+            const saveButton = createButton('Save', 'save_subtask_button', () => saveSubtask(task.id, subtask.id, subtaskInput));
+
+            subtaskContent.innerHTML = '';
+            subtaskContent.appendChild(subtaskInput);
+            subtaskContent.appendChild(saveButton);
+            subtaskInput.focus();
+        }
+    }
+}
+
+function saveSubtask(taskId, subtaskId, subtaskInput) {
+    const task = tasks.find(task => task.id === taskId);
+    if (task) {
+        const subtask = task.subtasks.find(subtask => subtask.id === subtaskId);
+        if (subtask) {
+            const newSubtaskName = subtaskInput.value.trim();
+            if (newSubtaskName !== '') {
+                subtask.name = newSubtaskName;
+                saveToLocalStorage();
+            }
+            showList(true);
+        }
+    }
+}
+
 
 function deleteTask(task) {
     const index = tasks.findIndex(item => item.id === task.id);
@@ -109,104 +258,35 @@ function saveTask(task, newTaskName) {
     task.name = newTaskName;
     const listItem = document.getElementById(`${task.id}`);
 
-    setListItemInnerHtml(listItem, task);
+    listItem.innerHTML = renderTaskContent(task);
 
-    const taskButtons = getSpanOfButtons(task);
+    const taskButtons = createButtonsSpan(task);
     listItem.appendChild(taskButtons);
 
     saveToLocalStorage();
 }
 
-function addSubtaskontent(subtaskOuterContainer, task) {
-    const subtaskContainer = document.createElement('div');
-    subtaskContainer.classList.add('subtask-container');
-    subtaskContainer.id = `subtask_container_${task.id}`;
-
-    const subtaskInput = document.createElement('input');
-    subtaskInput.type = 'text';
-    subtaskInput.id = `subtask_input_${task.id}`;
-    subtaskInput.placeholder = 'Add subtask';
-
-    const addSubtaskButton = document.createElement('button');
-    addSubtaskButton.innerHTML = 'Add Subtask';
-    addSubtaskButton.addEventListener('click', function () {
-        addSubtask(task.id, document.getElementById(`subtask_input_${task.id}`).value);
-    });
-
-    subtaskContainer.appendChild(subtaskInput);
-    subtaskContainer.appendChild(addSubtaskButton);
-
-    subtaskOuterContainer.appendChild(subtaskContainer);
-    if (task.subtasks.length > 0) {
-
-        const subTaskListContainer = document.createElement('div');
-
-        for (const subtask of task.subtasks) {
-            const subtaskElement = document.createElement('div');
-            subtaskElement.classList.add('subTask_element')
-            subtaskElement.innerHTML = `
-        <input type="checkbox" id="checkbox_${subtask.id}" onclick="toggleSubtaskStatus(${task.id}, ${subtask.id})" ${subtask.status ? "checked" : ""}>
-        <span id="subtask_content_${subtask.id}">${subtask.name}</span>
-        <button class = "delete_subtask_button" onclick="deleteSubtask(${task.id}, ${subtask.id})">Delete</button>
-    `;
-
-
-            subTaskListContainer.appendChild(subtaskElement);
-        }
-        subtaskOuterContainer.appendChild(subTaskListContainer);
-    }
+function getSubTaskInputContent(task) {
+    return document.getElementById(`subtask_input_${task.id}`).value
 }
 
-function setListItemInnerHtml(listItem, task) {
-    listItem.innerHTML = `
+
+
+function renderTaskContent(task) {
+    return `
         <input type="checkbox" id="checkbox_${task.id}" onclick="toggleTaskStatus(${task.id})" ${task.status ? "checked" : ""}>
         <span id="task_content_${task.id}" onclick="toggleSubtasksVisibility(${task.id})">${task.name}</span>
     `;
-
-    const subtaskOuterContainer = document.createElement('div');
-    subtaskOuterContainer.classList.add(`s_task`);
-    subtaskOuterContainer.classList.add(`s_${task.id}`);
-    listItem.appendChild(subtaskOuterContainer);
-
-    const subtasksButton = document.createElement('button');
-    subtasksButton.innerHTML = 'Subtasks';
-    subtasksButton.addEventListener('click', function () {
-        toggleSubtasksVisibility(task.id);
-    });
-    subtaskOuterContainer.appendChild(subtasksButton);
-
-    if (task.showSubtasks) {
-
-        addSubtaskontent(subtaskOuterContainer, task);
-
-    }
-    listItem.appendChild(subtaskOuterContainer);
 }
 
-function getSpanOfButtons(task) {
+
+
+function createButtonsSpan(task) {
     const buttonSpan = document.createElement('span');
-    const deleteButton = document.createElement('button');
-    deleteButton.innerHTML = 'Delete';
-    deleteButton.classList.add('delete_button');
-    deleteButton.addEventListener('click', function () {
-        deleteTask(task);
-    });
+    const deleteButton = createButton('Delete', 'delete_button', () => deleteTask(task));
+    const editButton = createButton('Edit', 'edit_button', () => editTask(task));
+    const infoButton = createButton('Info', 'info_button', () => showTaskDetails(task));
 
-    const editButton = document.createElement('button');
-    editButton.innerHTML = 'Edit';
-    editButton.classList.add('edit_button');
-    editButton.addEventListener('click', function () {
-        editTask(task);
-    });
-
-    const infoButton = document.createElement('button');
-    infoButton.innerHTML = 'Info';
-    infoButton.classList.add('info_button');
-    infoButton.addEventListener('click', function () {
-        showTaskDetails(task);
-    });
-
-    // creating a span where info of task will be shown
     const taskInfoSpan = document.createElement('span');
     taskInfoSpan.id = `task_info_${task.id}`;
 
@@ -216,10 +296,15 @@ function getSpanOfButtons(task) {
     buttonSpan.appendChild(taskInfoSpan);
 
     return buttonSpan;
-
-
 }
 
+function createButton(text, className, eventListenerFunction) {
+    const button = document.createElement('button');
+    button.innerHTML = text;
+    button.classList.add(className);
+    button.addEventListener('click', eventListenerFunction);
+    return button;
+}
 
 
 function toggleTaskStatus(taskId) {
@@ -347,18 +432,6 @@ function deleteSubtask(taskId, subtaskId) {
     }
 }
 
-// function editSubtask(taskId, subtaskId, newSubtaskName) {
-//     const task = tasks.find(task => task.id === taskId);
-//     if (task) {
-//         const subtask = task.subtasks.find(subtask => subtask.id === subtaskId);
-//         if (subtask) {
-//             subtask.name = newSubtaskName;
-//             saveToLocalStorage();
-//             showList(true);
-//         }
-//     }
-// }
-
 
 function showBacklogs() {
 
@@ -399,5 +472,5 @@ document.addEventListener('keypress', function (event) {
 window.addEventListener('DOMContentLoaded', function () {
     // Retriving the content from local storage
     retrieveFromLocalStorage();
-    //localStorage.clear();
+    localStorage.clear();
 });
