@@ -1,6 +1,7 @@
 // Array to store tasks
 let tasks = [];
 let taskIdCounter = 0;
+let activityLogs = [];
 
 /* This function is called when the user clicks the "Add" button or presses the Enter key.
    It retrieves the task input data, creates a new task object, and adds it to the tasks array.
@@ -16,6 +17,13 @@ function addTask() {
 
         const taskList = document.getElementById('task_list');
     }
+
+    const log = {
+        timestamp: new Date(),
+        taskName: taskData.name,
+        action: "added",
+    };
+    activityLogs.push(log);
     // saving the content to local storage
     saveToLocalStorage();
     showList();
@@ -194,6 +202,13 @@ function deleteTask(task) {
     if (index !== -1) {
         tasks.splice(index, 1);
         showList();
+
+        const log = {
+            timestamp: new Date(),
+            taskName: task.name,
+            action: "deleted",
+        };
+        activityLogs.push(log);
         saveToLocalStorage();
     }
 }
@@ -212,6 +227,14 @@ function editTask(task) {
         taskContent.appendChild(taskInput);
         taskContent.appendChild(saveButton);
         taskInput.focus();
+
+        const log = {
+            timestamp: new Date(),
+            taskName: task.name,
+            action: "edited",
+        };
+        activityLogs.push(log);
+        saveToLocalStorage();
     }
 
 
@@ -369,13 +392,15 @@ function updateSubtaskContainer(task) {
 function saveToLocalStorage() {
 
     localStorage.setItem('tasks', JSON.stringify(tasks));
-    localStorage.setItem('taskIdCounter', JSON.stringify(taskIdCounter))
+    localStorage.setItem('taskIdCounter', JSON.stringify(taskIdCounter));
+    localStorage.setItem('activityLogs', JSON.stringify(activityLogs))
 }
 
 function retrieveFromLocalStorage() {
 
     const savedTasks = localStorage.getItem('tasks');
     const savedTaskIdCounter = localStorage.getItem('taskIdCounter');
+    const savedActivityLogs = localStorage.getItem('activityLogs');
 
     if (savedTasks) {
         tasks = JSON.parse(savedTasks);
@@ -383,6 +408,10 @@ function retrieveFromLocalStorage() {
 
     if (savedTaskIdCounter) {
         taskIdCounter = JSON.parse(savedTaskIdCounter);
+    }
+
+    if (savedActivityLogs) {
+        activityLogs = JSON.parse(savedActivityLogs);
     }
 }
 
@@ -562,3 +591,46 @@ const sortSelect = document.getElementById("sort_by");
 sortSelect.addEventListener("change", function () {
     sortTasks(sortSelect.value);
 });
+
+
+
+function formatLog(log) {
+    const timestamp = log.timestamp.toLocaleString();
+    return `[${timestamp}] Task "${log.taskName}" ${log.action}.`;
+}
+
+const activityLogsButton = document.querySelector('.activity_log_button');
+activityLogsButton.addEventListener('click', toggleActivityLogs);
+
+function toggleActivityLogs() {
+    console.log('hi');
+    const activityLogsList = document.getElementById('activity_logs_list');
+    if (activityLogsList.style.display === '' || activityLogsList.style.display === 'none') {
+        showActivityLogs();
+        console.log('hi 1');
+        activityLogsList.style.display = 'block';
+
+    }
+    else {
+        activityLogsList.style.display = 'none';
+        console.log('hi 2');
+
+    }
+}
+
+function showActivityLogs() {
+    const activityLogsList = document.getElementById('activity_logs_list');
+    activityLogsList.innerHTML = '';
+
+    for (const log of activityLogs) {
+        addActivityLog(log);
+    }
+
+}
+
+function addActivityLog(log) {
+    const activityLogsList = document.getElementById('activity_logs_list');
+    const logItem = document.createElement('li');
+    logItem.textContent = formatLog(log);
+    activityLogsList.prepend(logItem); // To show the latest log on top
+}

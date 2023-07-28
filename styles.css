@@ -289,3 +289,20 @@ li:hover .task_content {
     color: red;
     font-weight: bolder;
 }
+
+.activity_log_button {
+    display: block;
+    font-size: 10px;
+}
+
+#activity_logs_list {
+    list-style-type: none;
+    padding: 0;
+}
+
+#activity_logs_list li {
+    margin-bottom: 5px;
+    padding: 5px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+}
