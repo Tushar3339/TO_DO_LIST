@@ -2,6 +2,9 @@
 let tasks = [];
 let taskIdCounter = 0;
 
+/* This function is called when the user clicks the "Add" button or presses the Enter key.
+   It retrieves the task input data, creates a new task object, and adds it to the tasks array.
+   It also clears the task input fields and saves the data to local storage.*/
 function addTask() {
 
     const taskData = getTaskInputData();
@@ -109,11 +112,22 @@ function createListItem(taskContainer, task) {
     const listItem = document.createElement('li');
     listItem.id = `${task.id}`;
 
+    if (task.status) {
+        listItem.classList.add('completed');
+    }
+
     listItem.innerHTML = renderTaskContent(task);
     const taskButtons = createButtonsSpan(task);
     listItem.appendChild(taskButtons);
 
     taskContainer.appendChild(listItem);
+}
+
+function renderTaskContent(task) {
+    return `
+        <input type="checkbox" id="checkbox_${task.id}" onclick="toggleTaskStatus(${task.id})" ${task.status ? "checked" : ""}>
+        <span id="task_content_${task.id}" class="task_content" >${task.name}</span>
+    `;
 }
 
 function createSubtaskContainer(taskContainer, task) {
@@ -286,16 +300,6 @@ function getSubTaskInputContent(task) {
 }
 
 
-
-function renderTaskContent(task) {
-    return `
-        <input type="checkbox" id="checkbox_${task.id}" onclick="toggleTaskStatus(${task.id})" ${task.status ? "checked" : ""}>
-        <span id="task_content_${task.id}" class="task_content" >${task.name}</span>
-    `;
-}
-
-
-
 function createButtonsSpan(task) {
     const buttonSpan = document.createElement('span');
     const deleteButton = createButton('Delete', 'delete_button', () => deleteTask(task));
@@ -327,6 +331,14 @@ function toggleTaskStatus(taskId) {
     if (task) {
         task.status = !task.status;
         saveToLocalStorage();
+
+        const listItem = document.getElementById(taskId);
+
+        if (task.status) {
+            listItem.classList.add('completed');
+        } else {
+            listItem.classList.remove('completed');
+        }
     }
 }
 
@@ -487,5 +499,35 @@ document.addEventListener('keypress', function (event) {
 window.addEventListener('DOMContentLoaded', function () {
     // Retriving the content from local storage
     retrieveFromLocalStorage();
-    localStorage.clear();
+    //localStorage.clear();
 });
+
+function searchTasks() {
+    const searchQuery = document.getElementById('search_input').value.trim();
+    const filteredTasks = tasks.filter(task => isTaskMatchingSearch(task, searchQuery));
+    if (filteredTasks.length > 0) {
+        showList(true, filteredTasks);
+    }
+    else {
+        alert('No tasks for your search');
+    }
+
+}
+
+function isTaskMatchingSearch(task, searchQuery) {
+    const lowerCaseQuery = searchQuery.toLowerCase();
+    if (task.name.toLowerCase().includes(lowerCaseQuery)) {
+        return true;
+    }
+
+    for (const subtask of task.subtasks) {
+        if (subtask.name.toLowerCase().includes(lowerCaseQuery)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+const searchInput = document.getElementById('search_input');
+searchInput.addEventListener('input', searchTasks);

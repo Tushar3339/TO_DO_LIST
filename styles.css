@@ -285,3 +285,7 @@ li:hover .task_content {
     width: 50%;
     font-size: 14px;
 }
+
+.completed {
+    text-decoration: line-through;
+}
