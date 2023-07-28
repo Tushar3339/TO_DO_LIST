@@ -1,4 +1,4 @@
-// Array to store tasks nbdvcjdjv j
+// Array to store tasks
 let tasks = [];
 let taskIdCounter = 0;
 
@@ -15,13 +15,10 @@ function addTask() {
         clearTaskInputFields();
 
         const taskList = document.getElementById('task_list');
-        // The following code is added so that when list is being viewed and user adds task, then it should reflect in list
-        if (taskList.style.display === 'block') {
-            showList(true);
-        }
     }
     // saving the content to local storage
     saveToLocalStorage();
+    showList();
 }
 
 function getTaskInputData() {
@@ -65,41 +62,27 @@ function clearTaskInputFields() {
 }
 
 
-// Function:showList --> This function will show all the tasks when clicking show list button or when called from other functions.
-// parameter1:isCallFromOtherFunction --> 
-//                 this is true by default, so when it gets called from other functions we show the tasks.
-//                 If user click on show list button when the tasks are shown, then we will hide the tasks.
+function showList(tasksToShow = tasks) {
 
-// parameter2:filteredTasks -->
-//                 The tasks will be filtered for the given filters.
-
-function showList(isCallFromOtherFunction, filteredTasks) {
     taskList = document.getElementById('task_list');
 
-    // This if condition will toggle the display of tasklist, so when user clicks on showlist again, it will disappear
-    if (taskList.style.display !== 'block' || isCallFromOtherFunction) {
-        taskList.style.display = 'block';
-        taskList.innerHTML = '';
+    taskList.innerHTML = '';
 
-        const tasksToShow = filteredTasks && filteredTasks.length > 0 ? filteredTasks : tasks;
-
-        if (tasksToShow.length === 0) {
-            taskList.innerHTML = '<li>No tasks found</li>';
-        } else {
-            for (const task of tasksToShow) {
-
-                const taskContainer = createTaskContainer(task);
-                taskList.appendChild(taskContainer);
-            }
-        }
+    if (tasksToShow.length === 0) {
+        taskList.innerHTML = '<li class = "no_task">NO TASKS FOUND!</li>';
     } else {
-        taskList.style.display = 'none';
+        for (const task of tasksToShow) {
+
+            const taskContainer = createTaskContainer(task);
+            taskList.appendChild(taskContainer);
+        }
     }
 }
 
 function createTaskContainer(task) {
     const taskContainer = document.createElement('div');
     taskContainer.classList.add('task_container');
+    taskContainer.classList.add(`task_container_${task.id}`)
 
     createListItem(taskContainer, task);
     createSubtaskContainer(taskContainer, task)
@@ -138,9 +121,9 @@ function createSubtaskContainer(taskContainer, task) {
     const subtasksButton = createButton('Subtasks', 'subtask_button', () => toggleSubtasksVisibility(task.id));
     subtaskContainer.appendChild(subtasksButton);
 
-    if (task.showSubtasks) {
-        addSubtaskontent(subtaskContainer, task);
-    }
+    // if (task.showSubtasks) {
+    //     addSubtaskontent(subtaskContainer, task);
+    // }
 
     taskContainer.appendChild(subtaskContainer);
 }
@@ -206,46 +189,11 @@ function createSubtaskElement(task, subtask, subTaskListContainer) {
     subTaskListContainer.appendChild(subtaskElement);
 }
 
-function editSubtask(taskId, subtaskId, subtaskContent) {
-    const task = tasks.find(task => task.id === taskId);
-    if (task) {
-        const subtask = task.subtasks.find(subtask => subtask.id === subtaskId);
-        if (subtask) {
-            const subtaskInput = document.createElement('input');
-            subtaskInput.type = 'text';
-            subtaskInput.value = subtask.name;
-
-            const saveButton = createButton('Save', 'save_subtask_button', () => saveSubtask(task.id, subtask.id, subtaskInput));
-
-            subtaskContent.innerHTML = '';
-            subtaskContent.appendChild(subtaskInput);
-            subtaskContent.appendChild(saveButton);
-            subtaskInput.focus();
-        }
-    }
-}
-
-function saveSubtask(taskId, subtaskId, subtaskInput) {
-    const task = tasks.find(task => task.id === taskId);
-    if (task) {
-        const subtask = task.subtasks.find(subtask => subtask.id === subtaskId);
-        if (subtask) {
-            const newSubtaskName = subtaskInput.value.trim();
-            if (newSubtaskName !== '') {
-                subtask.name = newSubtaskName;
-                saveToLocalStorage();
-            }
-            showList(true);
-        }
-    }
-}
-
-
 function deleteTask(task) {
     const index = tasks.findIndex(item => item.id === task.id);
     if (index !== -1) {
         tasks.splice(index, 1);
-        showList(true);
+        showList();
         saveToLocalStorage();
     }
 }
@@ -290,9 +238,8 @@ function saveTask(task, taskInput) {
             task.name = newTaskName;
             saveToLocalStorage();
         }
-        showList(true);
+        showList();
     }
-    showList(true);
 }
 
 function getSubTaskInputContent(task) {
@@ -346,10 +293,77 @@ function toggleSubtasksVisibility(taskId) {
     const task = tasks.find(task => task.id === taskId);
     if (task) {
         task.showSubtasks = !task.showSubtasks;
-        showList(true);
         saveToLocalStorage();
-
+        updateSubtaskContainer(task);
     }
+}
+
+function addSubtask(taskId, subtaskName) {
+    const task = tasks.find(task => task.id === taskId);
+    if (task) {
+
+        const newSubtask = {
+            id: taskIdCounter++,
+            name: subtaskName,
+            status: false,
+        };
+        task.subtasks.push(newSubtask);
+        saveToLocalStorage();
+        updateSubtaskContainer(task);
+    }
+}
+
+function editSubtask(taskId, subtaskId, subtaskContent) {
+    const task = tasks.find(task => task.id === taskId);
+    if (task) {
+        const subtask = task.subtasks.find(subtask => subtask.id === subtaskId);
+        if (subtask) {
+            const subtaskInput = document.createElement('input');
+            subtaskInput.type = 'text';
+            subtaskInput.value = subtask.name;
+
+            const saveButton = createButton('Save', 'save_subtask_button', () => saveSubtask(task.id, subtask.id, subtaskInput, subtaskContent));
+
+            subtaskContent.innerHTML = '';
+            subtaskContent.appendChild(subtaskInput);
+            subtaskContent.appendChild(saveButton);
+            subtaskInput.focus();
+        }
+    }
+}
+
+function saveSubtask(taskId, subtaskId, subtaskInput, subtaskContent) {
+    const task = tasks.find(task => task.id === taskId);
+    if (task) {
+        const subtask = task.subtasks.find(subtask => subtask.id === subtaskId);
+        if (subtask) {
+            const newSubtaskName = subtaskInput.value.trim();
+
+            if (newSubtaskName !== '') {
+                subtask.name = newSubtaskName;
+                subtaskContent.innerHTML = '';
+                subtaskContent.textContent = subtask.name;
+                saveToLocalStorage();
+            }
+            //updateSubtaskContainer(task);
+        }
+    }
+}
+
+function updateSubtaskContainer(task) {
+    const taskContainer = document.querySelector(`.task_container_${task.id}`);
+
+    const subtaskContainer = taskContainer.querySelector('.subtask_container');
+
+    subtaskContainer.innerHTML = '';
+    const subtasksButton = createButton('Subtasks', 'subtask_button', () => toggleSubtasksVisibility(task.id));
+    subtaskContainer.appendChild(subtasksButton);
+
+    if (task.showSubtasks) {
+        addSubtaskontent(subtaskContainer, task);
+    }
+
+
 }
 
 function saveToLocalStorage() {
@@ -416,24 +430,11 @@ function filterTasks() {
         return isPriorityMatching(task) && isCategoryMatching(task) && isDueDateMatching(task);
     });
 
-    showList(true, filteredTasks);
+    showList(filteredTasks);
 }
 
 
-function addSubtask(taskId, subtaskName) {
-    const task = tasks.find(task => task.id === taskId);
-    if (task) {
 
-        const newSubtask = {
-            id: taskIdCounter++,
-            name: subtaskName,
-            status: false,
-        };
-        task.subtasks.push(newSubtask);
-        saveToLocalStorage();
-        showList(true);
-    }
-}
 
 
 function toggleSubtaskStatus(taskId, subtaskId) {
@@ -454,7 +455,7 @@ function deleteSubtask(taskId, subtaskId) {
         if (subtaskIndex !== -1) {
             task.subtasks.splice(subtaskIndex, 1);
             saveToLocalStorage();
-            showList(true);
+            showList();
         }
     }
 }
@@ -470,7 +471,7 @@ function showBacklogs() {
         alert("No Backlogs");
     }
 
-    showList(true, backlogs);
+    showList(backlogs);
 }
 
 const viewBacklogsButton = document.getElementById('view_backlogs_button');
@@ -479,12 +480,8 @@ viewBacklogsButton.addEventListener('click', function () {
 });
 
 const addButton = document.getElementById('add_button');
-const showButton = document.getElementById('show_button');
 
 addButton.addEventListener('click', addTask);
-showButton.addEventListener('click', function () {
-    showList(false);
-});
 
 const filterButton = document.getElementById('filter_button');
 filterButton.addEventListener('click', filterTasks);
@@ -499,19 +496,15 @@ document.addEventListener('keypress', function (event) {
 window.addEventListener('DOMContentLoaded', function () {
     // Retriving the content from local storage
     retrieveFromLocalStorage();
+
+    showList();
     //localStorage.clear();
 });
 
 function searchTasks() {
     const searchQuery = document.getElementById('search_input').value.trim();
     const filteredTasks = tasks.filter(task => isTaskMatchingSearch(task, searchQuery));
-    if (filteredTasks.length > 0) {
-        showList(true, filteredTasks);
-    }
-    else {
-        alert('No tasks for your search');
-    }
-
+    showList(filteredTasks);
 }
 
 function isTaskMatchingSearch(task, searchQuery) {
@@ -549,7 +542,7 @@ function sortTasks(sortBy) {
             break;
     }
 
-    showList(true);
+    showList();
 }
 
 function priorityValue(priority) {
