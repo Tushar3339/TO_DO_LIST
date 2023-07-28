@@ -531,3 +531,41 @@ function isTaskMatchingSearch(task, searchQuery) {
 
 const searchInput = document.getElementById('search_input');
 searchInput.addEventListener('input', searchTasks);
+
+function sortTasks(sortBy) {
+    switch (sortBy) {
+        case "due_date":
+            tasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+            break;
+        case "priority":
+            tasks.sort((a, b) => priorityValue(b.priority) - priorityValue(a.priority));
+            break;
+        case "name":
+            tasks.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+        default:
+            // Default sort by added date (by ID)
+            tasks.sort((a, b) => a.id - b.id);
+            break;
+    }
+
+    showList(true);
+}
+
+function priorityValue(priority) {
+    switch (priority) {
+        case "Low":
+            return 1;
+        case "Medium":
+            return 2;
+        case "High":
+            return 3;
+        default:
+            return 0;
+    }
+}
+
+const sortSelect = document.getElementById("sort_by");
+sortSelect.addEventListener("change", function () {
+    sortTasks(sortSelect.value);
+});

@@ -289,3 +289,9 @@ li:hover .task_content {
 .completed {
     text-decoration: line-through;
 }
+
+.search_and_sort_container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}

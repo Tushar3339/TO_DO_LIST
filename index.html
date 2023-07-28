@@ -63,15 +63,27 @@
 
             </div>
 
-            <div class="search_container">
-                <label for="search_input">Search:</label>
-                <input type="text" id="search_input" placeholder="Enter search query">
-            </div>
+
 
             <button id="filter_button">Filter</button>
         </div>
 
-        <div class="search_options">
+        <div class="search_and_sort_container">
+            <div class="filter_container">
+                <label for="sort_by">Sort by:</label>
+                <select id="sort_by">
+                    <option value="none">None</option>
+                    <option value="due_date">Due Date</option>
+                    <option value="priority">Priority</option>
+                    <option value="name">Name</option>
+                </select>
+            </div>
+
+            <div class="search_container">
+                <label for="search_input">Search:</label>
+                <input type="search" id="search_input">
+            </div>
+
             <button id="view_backlogs_button">View Backlogs</button>
         </div>
 
