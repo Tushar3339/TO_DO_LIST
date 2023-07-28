@@ -135,8 +135,10 @@ function createSubtaskContainer(taskContainer, task) {
 
 function addSubtaskontent(subtaskContainer, task) {
     const subtaskInputBox = document.createElement('div');
+    subtaskInputBox.classList.add('subtask_input_box');
 
     const subtaskInput = document.createElement('input');
+    subtaskInput.classList.add('subtask_input')
     subtaskInput.type = 'text';
     subtaskInput.id = `subtask_input_${task.id}`;
     subtaskInput.placeholder = 'Add subtask';
@@ -152,7 +154,7 @@ function addSubtaskontent(subtaskContainer, task) {
     if (task.subtasks.length > 0) {
 
         const subTaskListContainer = document.createElement('div');
-        subTaskListContainer.classList.add(`suntask_liElement`);
+        subTaskListContainer.classList.add(`subtask_list_container`);
 
         for (const subtask of task.subtasks) {
             createSubtaskElement(task, subtask, subTaskListContainer);
@@ -235,6 +237,22 @@ function deleteTask(task) {
 }
 
 function editTask(task) {
+
+    if (task) {
+        const taskContent = document.querySelector(`#task_content_${task.id}`);
+        const taskInput = document.createElement('input');
+        taskInput.type = 'text';
+        taskInput.value = task.name;
+
+        const saveButton = createButton('Save', 'save_task_button', () => saveTask(task, taskInput));
+
+        taskContent.innerHTML = '';
+        taskContent.appendChild(taskInput);
+        taskContent.appendChild(saveButton);
+        taskInput.focus();
+    }
+
+
     const listItem = document.getElementById(`${task.id}`);
     const taskText = listItem.querySelector(`#task_content_${task.id}`);
 
@@ -248,22 +266,19 @@ function editTask(task) {
         saveTask(task, editArea.value.trim());
     });
 
-    listItem.innerHTML = '';
-    listItem.appendChild(editArea);
-    listItem.appendChild(saveButton);
-    editArea.focus();
 }
 
-function saveTask(task, newTaskName) {
-    task.name = newTaskName;
-    const listItem = document.getElementById(`${task.id}`);
+function saveTask(task, taskInput) {
 
-    listItem.innerHTML = renderTaskContent(task);
-
-    const taskButtons = createButtonsSpan(task);
-    listItem.appendChild(taskButtons);
-
-    saveToLocalStorage();
+    if (task) {
+        const newTaskName = taskInput.value.trim();
+        if (newTaskName !== '') {
+            task.name = newTaskName;
+            saveToLocalStorage();
+        }
+        showList(true);
+    }
+    showList(true);
 }
 
 function getSubTaskInputContent(task) {
@@ -275,7 +290,7 @@ function getSubTaskInputContent(task) {
 function renderTaskContent(task) {
     return `
         <input type="checkbox" id="checkbox_${task.id}" onclick="toggleTaskStatus(${task.id})" ${task.status ? "checked" : ""}>
-        <span id="task_content_${task.id}" onclick="toggleSubtasksVisibility(${task.id})">${task.name}</span>
+        <span id="task_content_${task.id}" class="task_content" >${task.name}</span>
     `;
 }
 

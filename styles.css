@@ -44,6 +44,7 @@ h1 {
     font-size: 16px;
     color: #1935d2;
     border-radius: 5px;
+    font-weight: bold;
 }
 
 #add_button {
@@ -85,14 +86,15 @@ li {
 }
 
 .edit_button {
-    padding: 5px 10px;
-    font-size: 14px;
-    color: white;
     background-color: blue;
-    cursor: pointer;
-    border-radius: 5px;
+    border-color: darkblue;
+    border-width: 3px;
     margin-right: 5px;
     margin-left: 20px;
+}
+
+button:hover {
+    filter: brightness(0.8);
 }
 
 .edit_button:hover,
@@ -102,34 +104,26 @@ li {
 
 .edit_subtask_button {
     font-size: 13px;
-    color: white;
     background-color: blue;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
     margin-right: 5px;
 }
 
 .delete_button {
-    padding: 5px 10px;
-    font-size: 14px;
-    color: white;
     background-color: red;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
+    border-color: darkred;
+    border-width: 3px;
 }
 
 .delete_subtask_button {
     font-size: 13px;
     color: white;
     background-color: red;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px;
 }
 
-
+.add_subtask_button {
+    font-size: 13px;
+    margin-left: 5px;
+}
 
 .delete_button:hover,
 .delete_subtask_button:hover {
@@ -137,7 +131,7 @@ li {
 }
 
 button {
-
+    padding: 3px 6px;
     font-size: 14px;
     color: white;
     background-color: rgba(3, 108, 82, 0.623);
@@ -247,17 +241,47 @@ button {
     flex-direction: column;
     flex-wrap: wrap;
     overflow: hidden;
+    background-color: rgb(205, 217, 217);
 }
 
 .search_options {
     margin: 2%;
 }
 
-.suntask_liElement {
+.subtask_list_container {
     flex-grow: 1;
-
-    padding: 12px;
-
+    padding: 5px 15px;
     overflow-y: auto;
     height: 90px;
+    /* background-color: azure; */
+    margin-top: 10px;
+}
+
+li .task_content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60%;
+    /* Adjust this value to fit your design */
+    display: inline-block;
+    font-weight: bold;
+}
+
+li:hover .task_content {
+    overflow: auto;
+}
+
+.subtask_element {
+    margin-bottom: 5px;
+}
+
+.subtask_input_box {
+    margin-top: 5px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.subtask_input {
+    width: 50%;
+    font-size: 14px;
 }
