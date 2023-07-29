@@ -77,7 +77,16 @@ function showList(tasksToShow = tasks) {
     taskList.innerHTML = '';
 
     if (tasksToShow.length === 0) {
-        taskList.innerHTML = '<li class = "no_task">NO TASKS FOUND!</li>';
+
+        if (tasks.length === 0) {
+            taskList.innerHTML = `<li class = "no_task">NO TASKS IN TO-DO-LIST!</li>`;
+        }
+        else {
+            resetButton = createButton('Reset', 'reset_button', () => { showList() });
+            taskList.innerHTML = `<li class = "no_task">NO TASKS FOUND!</li>`;
+            taskList.appendChild(resetButton);
+        }
+
     } else {
         for (const task of tasksToShow) {
 
@@ -493,12 +502,8 @@ function deleteSubtask(taskId, subtaskId) {
 function showBacklogs() {
 
     const now = new Date();
-    console.log('hii' + now);
     const backlogs = tasks.filter(task => new Date(task.dueDate) < now && !task.status);
 
-    if (backlogs.length === 0) {
-        alert("No Backlogs");
-    }
 
     showList(backlogs);
 }
@@ -634,3 +639,89 @@ function addActivityLog(log) {
     logItem.textContent = formatLog(log);
     activityLogsList.prepend(logItem); // To show the latest log on top
 }
+
+
+// Add an event listener to the task input field to capture real-time input
+const taskInput = document.getElementById('task_input');
+taskInput.addEventListener('input', autoCompleteDueDate);
+
+function autoCompleteDueDate() {
+    const taskData = getTaskInputData();
+    const { name, dueDate } = extractDueDateFromTaskText(taskData.name);
+
+    // Update the input content with the auto-completed task name
+    taskInput.value = name;
+
+    // If a valid due date is found, update the "task_due_date" input field
+    if (dueDate) {
+        const dueDateInput = document.getElementById('task_due_date');
+        const formattedDueDate = formatDate(dueDate);
+        dueDateInput.value = formattedDueDate;
+    }
+}
+
+function extractDueDateFromTaskText(taskText) {
+    const byIndex = taskText.toLowerCase().indexOf('by');
+
+    if (byIndex !== -1) {
+        const dateString = taskText.substring(byIndex + 2).trim();
+
+        //console.log('hii  ' + dateString);
+        // Check for keywords like 'tomorrow' or 'the day after tomorrow' or 'day after tomorrow'
+        if (/^tomorrow|the\sday\safter\stomorrow|day\safter\stomorrow$/i.test(dateString)) {
+            // Get the current date and add one day to it for tomorrow's date
+            //console.log('hii545');
+
+            const tomorrow = new Date();
+
+            if (/^tomorrow$/.test(dateString)) {
+                tomorrow.setDate(tomorrow.getDate() + 1);
+            }
+            else {
+                tomorrow.setDate(tomorrow.getDate() + 2);
+            }
+
+            const name = taskText.substring(0, byIndex).trim();
+            return {
+                name,
+                dueDate: tomorrow
+            };
+        } else {
+            // Check for date patterns like '13th Jan 2023
+            const dateRegex = /(\d{1,2}(?:th|st|nd|rd)? (?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{4})/;
+            const dateMatch = dateString.match(dateRegex);
+
+            if (dateMatch) {
+
+                let cleanDateString = dateMatch[0].replace('th', '');
+                cleanDateString = cleanDateString.replace('nd', '');
+                cleanDateString = cleanDateString.replace('rd', '');
+                cleanDateString = cleanDateString.replace('st', '');
+
+                const dueDate = new Date(cleanDateString);
+                if (!isNaN(dueDate)) {
+                    // Remove the date expression from the task text
+                    const name = taskText.substring(0, byIndex).trim();
+                    return {
+                        name,
+                        dueDate,
+                    };
+                }
+            }
+        }
+    }
+
+    // If no valid due date is found, return the original task name and no due date
+    return {
+        name: taskText,
+        dueDate: null,
+    };
+}
+
+function formatDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
